@@ -16,129 +16,52 @@
 
 // http://central.sonatype.org/pages/gradle.html
 
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.7"
-    }
+plugins {
+    id "groovy"
+    id "java-gradle-plugin"
+    id "maven"
+    id "org.openjfx.javafxplugin" version "0.0.9"
 }
 
-plugins {
-    id 'maven'
-    id 'signing'
-    id 'groovy'
-}
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
+
+group = "com.github.yuki-0710"
+archivesBaseName = "fxlauncher-gradle-plugin"
+version = "2.0.0"
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    testCompile 'junit:junit:4.12'
-    testCompile('org.spockframework:spock-core:1.0-groovy-2.4') {
-        exclude group: 'org.codehaus.groovy', module: 'groovy-all'
+    runtimeOnly "org.openjfx:javafx-graphics:$javafx.version:mac"
+    testCompile "junit:junit:4.12"
+    testCompile("org.spockframework:spock-core:1.0-groovy-2.4") {
+        exclude group: "org.codehaus.groovy", module: "groovy-all"
     }
 }
 
-apply plugin: "com.gradle.plugin-publish"
-
-tasks.withType(JavaCompile) {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+javafx {
+    version = "14"
+    modules = [ "javafx.controls", "javafx.fxml", "javafx.graphics", "javafx.web" ]
 }
-
-tasks.withType(GroovyCompile) {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
-}
-
-signing {
-    sign configurations.archives
-}
-
-group = "no.tornado"
-archivesBaseName = "fxlauncher-gradle-plugin"
-version = "1.0.21.1"
 
 uploadArchives {
     repositories {
         mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: ossrhUsername, password: ossrhPassword)
-            }
-
-            pom.project {
-                name 'FXLauncher Gradle plugin'
-                packaging 'jar'
-                // optionally artifactId can be defined here
-                description 'FXLauncher Gradle plugin'
-                url 'https://github.com/edvin/fxlauncher-gradle-plugin'
-
-                scm {
-                    connection 'scm:svn:https://github.com/edvin/fxlauncher-gradle-plugin'
-                    developerConnection 'scm:svn:https://github.com/edvin/fxlauncher-gradle-plugin'
-                    url 'https://github.com/edvin/fxlauncher-gradle-plugin'
-                }
-
-                licenses {
-                    license {
-                        name 'The Apache License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-
-                developers {
-                    developer {
-                        id 'aalmiray'
-                        name 'Andres Almiray'
-                    }
-                    developer {
-                        id 'edvin'
-                        name 'Edvin Syse'
-                        email 'es@syse.no'
-                    }
-                }
-            }
+            repository(url: uri(getProperty("github.repository.path")))
         }
     }
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-pluginBundle {
-    website = 'https://github.com/edvin/fxlauncher-gradle-plugin'
-    vcsUrl = 'https://github.com/edvin/fxlauncher-gradle-plugin'
-    description = 'FXLauncher plugin'
-    tags = ['fxlauncher', 'javafx']
-
+gradlePlugin {
     plugins {
-        fxlauncherPlugin {
-            id = 'no.tornado.fxlauncher'
-            displayName = 'FXLauncher Gradle plugin'
+        mavenS3 {
+            id = "com.github.yuki-0710.fxlauncher"
+            implementationClass = "no.tornado.fxlauncher.gradle.FXLauncherPlugin"
         }
     }
 }
