@@ -17,6 +17,7 @@ package no.tornado.fxlauncher.gradle
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 /**
@@ -26,6 +27,7 @@ class GenerateApplicationManifestTask extends DefaultTask {
     private static final CREATE_MANIFEST_CLASSNAME = 'fxlauncher.CreateManifest'
 
     private static ClassLoader cl
+    @Internal
     Configuration classpath
 
     @TaskAction

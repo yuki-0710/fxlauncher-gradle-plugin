@@ -17,8 +17,10 @@
 // http://central.sonatype.org/pages/gradle.html
 
 plugins {
-    id("com.gradle.plugin-publish") version "1.3.1"
-    id("org.openjfx.javafxplugin") version "0.0.9"
+    id "groovy"
+    id "java-gradle-plugin"
+    id "maven-publish"
+    id "org.openjfx.javafxplugin" version "0.0.9"
 }
 
 sourceCompatibility = "1.8"
@@ -50,13 +52,19 @@ javafx {
 }
 
 publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            artifactId = "fxlauncher-gradle-plugin"
+        }
+    }
     repositories {
         maven {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/yuki-0710/fxlauncher-gradle-plugin")
             credentials {
-                username = System.getenv("GITHUB_USERNAME")
-                password = System.getenv("GITHUB_TOKEN")
+                username = System.getenv("GITHUB_USERNAME") ?: findProperty("gpr.user")
+                password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.token")
             }
         }
     }
